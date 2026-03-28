@@ -1,59 +1,35 @@
-import { useState, useEffect, useCallback } from '@wordpress/element';
-import { Button, Spinner, Notice } from '@wordpress/components';
-import { DataViews } from '@wordpress/dataviews';
+import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
+import {
+	Button,
+	Card,
+	CardBody,
+	CardHeader,
+	Spinner,
+	Notice,
+	SelectControl,
+} from '@wordpress/components';
+import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews/wp';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { SeveritySelect } from './components/SeveritySelect';
 import { transformChecksToRows, rowsToSettings } from './utils/transform';
 
-const FIELDS = [
-	{
-		id: 'check_name',
-		label: __( 'Check', 'validation-api-settings' ),
-		enableGlobalSearch: true,
-		enableSorting: true,
-	},
-	{
-		id: 'description',
-		label: __( 'Description', 'validation-api-settings' ),
-		enableGlobalSearch: true,
-	},
-	{
-		id: 'scope_label',
-		label: __( 'Scope', 'validation-api-settings' ),
-		enableSorting: true,
-	},
-	{
-		id: 'plugin_name',
-		label: __( 'Plugin', 'validation-api-settings' ),
-		enableSorting: true,
-	},
-	{
-		id: 'level',
-		label: __( 'Level', 'validation-api-settings' ),
-		Edit: SeveritySelect,
-		elements: [
-			{
-				value: 'error',
-				label: __( 'Error', 'validation-api-settings' ),
-			},
-			{
-				value: 'warning',
-				label: __( 'Warning', 'validation-api-settings' ),
-			},
-			{
-				value: 'none',
-				label: __( 'Disabled', 'validation-api-settings' ),
-			},
-		],
-	},
+const LEVEL_OPTIONS = [
+	{ value: 'error', label: __( 'Error', 'validation-api-settings' ) },
+	{ value: 'warning', label: __( 'Warning', 'validation-api-settings' ) },
+	{ value: 'none', label: __( 'Disabled', 'validation-api-settings' ) },
 ];
 
 const DEFAULT_VIEW = {
 	type: 'table',
 	perPage: 25,
 	layout: {},
-	fields: [ 'check_name', 'description', 'scope_label', 'plugin_name', 'level' ],
+	fields: [
+		'check_name',
+		'description',
+		'scope_label',
+		'plugin_name',
+		'level',
+	],
 };
 
 export function App() {
@@ -91,24 +67,16 @@ export function App() {
 		fetchData();
 	}, [] );
 
-	const onChangeField = useCallback( ( updatedItems ) => {
+	const handleLevelChange = useCallback( ( rowId, newLevel ) => {
 		setRows( ( prevRows ) =>
 			prevRows.map( ( row ) => {
-				const updated = updatedItems.find(
-					( item ) => item.id === row.id
-				);
-
-				if ( ! updated ) {
+				if ( row.id !== rowId ) {
 					return row;
 				}
-
-				const newLevel = updated.level;
-				const hasOverride = newLevel !== row.default_level;
-
 				return {
 					...row,
 					level: newLevel,
-					has_override: hasOverride,
+					has_override: newLevel !== row.default_level,
 				};
 			} )
 		);
@@ -151,6 +119,52 @@ export function App() {
 		}
 	}, [ rows ] );
 
+	const fields = useMemo(
+		() => [
+			{
+				id: 'check_name',
+				label: __( 'Check', 'validation-api-settings' ),
+				enableGlobalSearch: true,
+				enableSorting: true,
+			},
+			{
+				id: 'description',
+				label: __( 'Description', 'validation-api-settings' ),
+				enableGlobalSearch: true,
+			},
+			{
+				id: 'scope_label',
+				label: __( 'Scope', 'validation-api-settings' ),
+				enableSorting: true,
+			},
+			{
+				id: 'plugin_name',
+				label: __( 'Plugin', 'validation-api-settings' ),
+				enableSorting: true,
+			},
+			{
+				id: 'level',
+				label: __( 'Level', 'validation-api-settings' ),
+				render: ( { item } ) => (
+					<SelectControl
+						__nextHasNoMarginBottom
+						value={ item.level }
+						options={ LEVEL_OPTIONS }
+						onChange={ ( value ) =>
+							handleLevelChange( item.id, value )
+						}
+					/>
+				),
+				elements: LEVEL_OPTIONS,
+			},
+		],
+		[ handleLevelChange ]
+	);
+
+	const { data: visibleData, paginationInfo } = useMemo( () => {
+		return filterSortAndPaginate( rows, view, fields );
+	}, [ rows, view, fields ] );
+
 	if ( isLoading ) {
 		return (
 			<div className="validation-api-settings">
@@ -163,7 +177,10 @@ export function App() {
 		<div className="validation-api-settings">
 			<div className="validation-api-settings__header">
 				<h1>
-					{ __( 'Validation API Settings', 'validation-api-settings' ) }
+					{ __(
+						'Validation API Settings',
+						'validation-api-settings'
+					) }
 				</h1>
 				<Button
 					variant="primary"
@@ -185,23 +202,36 @@ export function App() {
 				</Notice>
 			) }
 
-			{ rows.length === 0 ? (
-				<Notice status="warning" isDismissible={ false }>
-					{ __(
-						'No validation checks are registered. Activate plugins that register checks with the Validation API.',
-						'validation-api-settings'
+			<Card>
+				{/* <CardHeader>
+					<h2>
+						{ __(
+							'Registered Checks',
+							'validation-api-settings'
+						) }
+					</h2>
+                    <p>{ __( 'Manage the validation settings for your site.', 'validation-api-settings' ) }</p>
+				</CardHeader> */}
+				<CardBody>
+					{ rows.length === 0 ? (
+						<Notice status="warning" isDismissible={ false }>
+							{ __(
+								'No validation checks are registered. Activate plugins that register checks with the Validation API.',
+								'validation-api-settings'
+							) }
+						</Notice>
+					) : (
+						<DataViews
+							data={ visibleData }
+							fields={ fields }
+							view={ view }
+							onChangeView={ setView }
+							paginationInfo={ paginationInfo }
+							getItemId={ ( item ) => item.id }
+						/>
 					) }
-				</Notice>
-			) : (
-				<DataViews
-					data={ rows }
-					fields={ FIELDS }
-					view={ view }
-					onChangeView={ setView }
-					onChangeField={ onChangeField }
-					getItemId={ ( item ) => item.id }
-				/>
-			) }
+				</CardBody>
+			</Card>
 		</div>
 	);
 }

@@ -57,6 +57,15 @@ class Plugin {
 	}
 
 	/**
+	 * Get the URL to the package directory.
+	 *
+	 * @return string
+	 */
+	private function get_package_url() {
+		return plugins_url( '', VALIDATION_API_SETTINGS_DIR . 'bootstrap.php' ) . '/';
+	}
+
+	/**
 	 * Enqueue admin scripts and styles on the settings page only.
 	 *
 	 * @param string $hook_suffix The current admin page hook suffix.
@@ -72,20 +81,28 @@ class Plugin {
 			return;
 		}
 
-		$asset = require $asset_file;
+		$asset       = require $asset_file;
+		$package_url = $this->get_package_url();
 
 		wp_enqueue_script(
 			'validation-api-settings',
-			VALIDATION_API_SETTINGS_URL . 'build/validation-api-settings.js',
+			$package_url . 'build/validation-api-settings.js',
 			$asset['dependencies'],
 			$asset['version'],
 			true
 		);
 
 		wp_enqueue_style(
-			'validation-api-settings',
-			VALIDATION_API_SETTINGS_URL . 'build/validation-api-settings.css',
+			'validation-api-settings-dataviews',
+			$package_url . 'build/dataviews.css',
 			array( 'wp-components' ),
+			$asset['version']
+		);
+
+		wp_enqueue_style(
+			'validation-api-settings',
+			$package_url . 'build/validation-api-settings.css',
+			array( 'wp-components', 'validation-api-settings-dataviews' ),
 			$asset['version']
 		);
 

@@ -16,6 +16,10 @@ export function transformChecksToRows( checks, settings ) {
 			for ( const [ checkName, check ] of Object.entries(
 				blockChecks
 			) ) {
+				if ( check.configurable === false ) {
+					continue;
+				}
+
 				const override =
 					settings?.block?.[ blockType ]?.[ checkName ] ?? null;
 
@@ -44,6 +48,10 @@ export function transformChecksToRows( checks, settings ) {
 				for ( const [ checkName, check ] of Object.entries(
 					metaChecks
 				) ) {
+					if ( check.configurable === false ) {
+						continue;
+					}
+
 					const override =
 						settings?.meta?.[ postType ]?.[ metaKey ]?.[
 							checkName
@@ -74,6 +82,10 @@ export function transformChecksToRows( checks, settings ) {
 			for ( const [ checkName, check ] of Object.entries(
 				editorChecks
 			) ) {
+				if ( check.configurable === false ) {
+					continue;
+				}
+
 				const override =
 					settings?.editor?.[ postType ]?.[ checkName ] ?? null;
 

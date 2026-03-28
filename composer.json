@@ -1,12 +1,15 @@
 {
     "name": "validation-api/settings",
     "description": "Admin settings page for the Validation API plugin",
-    "type": "wordpress-plugin",
+    "type": "library",
     "license": "GPL-2.0-or-later",
     "autoload": {
-        "psr-4": {
-            "ValidationAPISettings\\": "includes/"
-        }
+        "classmap": [
+            "includes/"
+        ],
+        "files": [
+            "bootstrap.php"
+        ]
     },
     "require": {
         "php": ">=7.0"
