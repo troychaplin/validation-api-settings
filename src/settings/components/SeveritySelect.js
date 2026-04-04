@@ -11,6 +11,8 @@ export function SeveritySelect( { value, onChange } ) {
 	return (
 		<SelectControl
 			__nextHasNoMarginBottom
+			label={ __( 'Level', 'validation-api-settings' ) }
+			hideLabelFromVision
 			value={ value }
 			options={ LEVEL_OPTIONS }
 			onChange={ onChange }

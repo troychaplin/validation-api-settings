@@ -4,8 +4,8 @@ const { blockTitles = {}, postTypeLabels = {} } =
 /**
  * Flatten the nested checks REST response into a row-per-check array.
  *
- * @param {Object} checks  The response from GET /wp/v2/checks.
- * @param {Object} settings The response from GET /wp/v2/settings.
+ * @param {Object} checks  The response from GET /wp/v2/validation-checks.
+ * @param {Object} settings The response from GET /validation-api-settings/v1/validation-settings.
  * @return {Array} Flat array of row objects.
  */
 export function transformChecksToRows( checks, settings ) {
@@ -28,13 +28,14 @@ export function transformChecksToRows( checks, settings ) {
 
 				rows.push( {
 					id: `block__${ blockType }__${ checkName }`,
+					scope: 'block',
+					block_type: blockType,
 					check_name: checkName,
 					description: check.description || '',
-					scope: 'block',
 					check_type: 'Block',
 					target: blockTitles[ blockType ] || blockType,
 					plugin_name: check._namespace || '\u2014',
-					level: override || check.level,
+					level: override ?? check.level,
 					default_level: check.level,
 					has_override: override !== null,
 				} );
@@ -62,13 +63,15 @@ export function transformChecksToRows( checks, settings ) {
 
 					rows.push( {
 						id: `meta__${ postType }__${ metaKey }__${ checkName }`,
+						scope: 'meta',
+						post_type: postType,
+						meta_key: metaKey,
 						check_name: checkName,
 						description: check.description || '',
-						scope: 'meta',
 						check_type: 'Meta',
 						target: `${ metaKey } (${ postTypeLabels[ postType ] || postType })`,
 						plugin_name: check._namespace || '\u2014',
-						level: override || check.level,
+						level: override ?? check.level,
 						default_level: check.level,
 						has_override: override !== null,
 					} );
@@ -94,13 +97,14 @@ export function transformChecksToRows( checks, settings ) {
 
 				rows.push( {
 					id: `editor__${ postType }__${ checkName }`,
+					scope: 'editor',
+					post_type: postType,
 					check_name: checkName,
 					description: check.description || '',
-					scope: 'editor',
 					check_type: 'Editor',
 					target: postTypeLabels[ postType ] || postType,
 					plugin_name: check._namespace || '\u2014',
-					level: override || check.level,
+					level: override ?? check.level,
 					default_level: check.level,
 					has_override: override !== null,
 				} );
@@ -116,7 +120,7 @@ export function transformChecksToRows( checks, settings ) {
  * Only includes rows that have been overridden.
  *
  * @param {Array} rows The flat array of row objects.
- * @return {Object} Nested settings object for POST /wp/v2/settings.
+ * @return {Object} Nested settings object for POST /validation-api-settings/v1/validation-settings.
  */
 export function rowsToSettings( rows ) {
 	const settings = {};
@@ -126,31 +130,29 @@ export function rowsToSettings( rows ) {
 			continue;
 		}
 
-		const parts = row.id.split( '__' );
-
-		switch ( parts[ 0 ] ) {
+		switch ( row.scope ) {
 			case 'block':
 				if ( ! settings.block ) settings.block = {};
-				if ( ! settings.block[ parts[ 1 ] ] )
-					settings.block[ parts[ 1 ] ] = {};
-				settings.block[ parts[ 1 ] ][ parts[ 2 ] ] = row.level;
+				if ( ! settings.block[ row.block_type ] )
+					settings.block[ row.block_type ] = {};
+				settings.block[ row.block_type ][ row.check_name ] = row.level;
 				break;
 
 			case 'meta':
 				if ( ! settings.meta ) settings.meta = {};
-				if ( ! settings.meta[ parts[ 1 ] ] )
-					settings.meta[ parts[ 1 ] ] = {};
-				if ( ! settings.meta[ parts[ 1 ] ][ parts[ 2 ] ] )
-					settings.meta[ parts[ 1 ] ][ parts[ 2 ] ] = {};
-				settings.meta[ parts[ 1 ] ][ parts[ 2 ] ][ parts[ 3 ] ] =
+				if ( ! settings.meta[ row.post_type ] )
+					settings.meta[ row.post_type ] = {};
+				if ( ! settings.meta[ row.post_type ][ row.meta_key ] )
+					settings.meta[ row.post_type ][ row.meta_key ] = {};
+				settings.meta[ row.post_type ][ row.meta_key ][ row.check_name ] =
 					row.level;
 				break;
 
 			case 'editor':
 				if ( ! settings.editor ) settings.editor = {};
-				if ( ! settings.editor[ parts[ 1 ] ] )
-					settings.editor[ parts[ 1 ] ] = {};
-				settings.editor[ parts[ 1 ] ][ parts[ 2 ] ] = row.level;
+				if ( ! settings.editor[ row.post_type ] )
+					settings.editor[ row.post_type ] = {};
+				settings.editor[ row.post_type ][ row.check_name ] = row.level;
 				break;
 		}
 	}

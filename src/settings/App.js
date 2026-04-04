@@ -5,7 +5,7 @@ import {
 	CardBody,
 	Spinner,
 	Notice,
-	SearchControl,
+	VisuallyHidden,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
@@ -28,9 +28,8 @@ export function App() {
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ isDirty, setIsDirty ] = useState( false );
 	const [ notice, setNotice ] = useState( null );
-	const [ searchTerm, setSearchTerm ] = useState( '' );
 	const [ sortConfig, setSortConfig ] = useState( {
-		key: 'check_name',
+		key: 'target',
 		direction: 'asc',
 	} );
 
@@ -39,7 +38,7 @@ export function App() {
 			try {
 				const [ checks, settings ] = await Promise.all( [
 					apiFetch( { path: '/wp/v2/validation-checks' } ),
-					apiFetch( { path: '/wp/v2/validation-settings' } ),
+					apiFetch( { path: '/validation-api-settings/v1/validation-settings' } ),
 				] );
 
 				setRows( transformChecksToRows( checks, settings ) );
@@ -60,6 +59,16 @@ export function App() {
 
 		fetchData();
 	}, [] );
+
+	useEffect( () => {
+		const handler = ( e ) => {
+			if ( isDirty ) {
+				e.preventDefault();
+			}
+		};
+		window.addEventListener( 'beforeunload', handler );
+		return () => window.removeEventListener( 'beforeunload', handler );
+	}, [ isDirty ] );
 
 	const handleLevelChange = useCallback( ( rowId, newLevel ) => {
 		setRows( ( prevRows ) =>
@@ -85,7 +94,7 @@ export function App() {
 			const settings = rowsToSettings( rows );
 
 			await apiFetch( {
-				path: '/wp/v2/validation-settings',
+				path: '/validation-api-settings/v1/validation-settings',
 				method: 'POST',
 				data: settings,
 			} );
@@ -124,20 +133,10 @@ export function App() {
 		} ) );
 	}, [] );
 
-	const visibleRows = useMemo( () => {
-		let filtered = rows;
-
-		if ( searchTerm ) {
-			const term = searchTerm.toLowerCase();
-			filtered = rows.filter(
-				( row ) =>
-					row.description.toLowerCase().includes( term ) ||
-					row.target.toLowerCase().includes( term )
-			);
-		}
-
+	const sortedRows = useMemo( () => {
 		const { key, direction } = sortConfig;
-		filtered.sort( ( a, b ) => {
+
+		return [ ...rows ].sort( ( a, b ) => {
 			const aVal = ( a[ key ] || '' ).toLowerCase();
 			const bVal = ( b[ key ] || '' ).toLowerCase();
 
@@ -145,14 +144,15 @@ export function App() {
 			if ( aVal > bVal ) return direction === 'asc' ? 1 : -1;
 			return 0;
 		} );
-
-		return filtered;
-	}, [ rows, searchTerm, sortConfig ] );
+	}, [ rows, sortConfig ] );
 
 	if ( isLoading ) {
 		return (
 			<div className="validation-api-settings">
 				<Spinner />
+				<VisuallyHidden>
+					{ __( 'Loading checks\u2026', 'validation-api-settings' ) }
+				</VisuallyHidden>
 			</div>
 		);
 	}
@@ -196,80 +196,66 @@ export function App() {
 							) }
 						</Notice>
 					) : (
-						<>
-							<SearchControl
-								__nextHasNoMarginBottom
-								value={ searchTerm }
-								onChange={ setSearchTerm }
-								placeholder={ __(
-									'Search checks\u2026',
-									'validation-api-settings'
-								) }
-							/>
+						<div className="validation-api-settings__table-wrap">
+							<table className="validation-api-settings__table">
+								<thead>
+									<tr>
+										{ COLUMNS.map( ( col ) => {
+											const isSortable = SORTABLE_COLUMNS.includes( col.key );
+											const isSorted = sortConfig.key === col.key;
 
-							<div className="validation-api-settings__table-wrap">
-								<table className="validation-api-settings__table">
-									<thead>
-										<tr>
-											{ COLUMNS.map( ( col ) => {
-												const isSortable = SORTABLE_COLUMNS.includes( col.key );
-												const isSorted = sortConfig.key === col.key;
-
-												return (
-													<th
-														key={ col.key }
-														className={ isSortable ? 'is-sortable' : undefined }
-														onClick={ isSortable ? () => handleSort( col.key ) : undefined }
-														aria-sort={
-															isSorted
-																? sortConfig.direction === 'asc'
-																	? 'ascending'
-																	: 'descending'
-																: undefined
-														}
-													>
-														{ col.label }
-														{ isSorted && (
-															<span className="sort-indicator">
-																{ sortConfig.direction === 'asc' ? ' \u25B2' : ' \u25BC' }
-															</span>
-														) }
-													</th>
-												);
-											} ) }
-										</tr>
-									</thead>
-									<tbody>
-										{ visibleRows.map( ( row ) => (
-											<tr key={ row.id }>
-												<td>{ row.description }</td>
-												<td>{ row.target }</td>
-												<td>{ row.check_type }</td>
-												<td>{ row.plugin_name }</td>
-												<td>
-													<SeveritySelect
-														value={ row.level }
-														onChange={ ( value ) =>
-															handleLevelChange( row.id, value )
-														}
-													/>
-												</td>
-											</tr>
-										) ) }
-										{ visibleRows.length === 0 && (
-											<tr>
-												<td colSpan={ COLUMNS.length }>
-													{ __(
-														'No checks match your search.',
-														'validation-api-settings'
+											return (
+												<th
+													key={ col.key }
+													aria-sort={
+														isSorted
+															? sortConfig.direction === 'asc'
+																? 'ascending'
+																: 'descending'
+															: undefined
+													}
+												>
+													{ isSortable ? (
+														<button
+															className="validation-api-settings__sort-button"
+															onClick={ () => handleSort( col.key ) }
+															type="button"
+														>
+															{ col.label }
+															{ isSorted && (
+																<span className="sort-indicator" aria-hidden="true">
+																	{ sortConfig.direction === 'asc' ? ' \u25B2' : ' \u25BC' }
+																</span>
+															) }
+														</button>
+													) : (
+														col.label
 													) }
-												</td>
-											</tr>
-										) }
-									</tbody>
-								</table>
-							</div>
-						</>
+												</th>
+											);
+										} ) }
+									</tr>
+								</thead>
+								<tbody>
+									{ sortedRows.map( ( row ) => (
+										<tr key={ row.id }>
+											<td>{ row.description }</td>
+											<td>{ row.target }</td>
+											<td>{ row.check_type }</td>
+											<td>{ row.plugin_name }</td>
+											<td>
+												<SeveritySelect
+													value={ row.level }
+													onChange={ ( value ) =>
+														handleLevelChange( row.id, value )
+													}
+												/>
+											</td>
+										</tr>
+									) ) }
+								</tbody>
+							</table>
+						</div>
 					) }
 				</CardBody>
 			</Card>
