@@ -1,6 +1,6 @@
 <img src="assets/icon-256x256.png" alt="Validation API Settings Plugin Banner" style="float: left; margin-right: 1.5em; height: auto; width: 128px;">
 
-# Validation API Settings
+# Validation API Settings Add-on
 
 Admin settings page for the [Validation API](https://github.com/troychaplin/validation-api) plugin. Adds a top-level menu page where site administrators can configure the level (error, warning, or disabled) of each registered validation check.
 
