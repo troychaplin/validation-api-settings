@@ -3,34 +3,24 @@ import {
 	Button,
 	Card,
 	CardBody,
-	CardHeader,
 	Spinner,
 	Notice,
-	SelectControl,
+	SearchControl,
 } from '@wordpress/components';
-import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews/wp';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { transformChecksToRows, rowsToSettings } from './utils/transform';
+import { SeveritySelect } from './components/SeveritySelect';
 
-const LEVEL_OPTIONS = [
-	{ value: 'error', label: __( 'Error', 'validation-api-settings' ) },
-	{ value: 'warning', label: __( 'Warning', 'validation-api-settings' ) },
-	{ value: 'none', label: __( 'Disabled', 'validation-api-settings' ) },
+const SORTABLE_COLUMNS = [ 'target', 'check_type', 'plugin_name', 'level' ];
+
+const COLUMNS = [
+	{ key: 'description', label: __( 'Description', 'validation-api-settings' ) },
+	{ key: 'target', label: __( 'Target', 'validation-api-settings' ) },
+	{ key: 'check_type', label: __( 'Check Type', 'validation-api-settings' ) },
+	{ key: 'plugin_name', label: __( 'Plugin', 'validation-api-settings' ) },
+	{ key: 'level', label: __( 'Level', 'validation-api-settings' ) },
 ];
-
-const DEFAULT_VIEW = {
-	type: 'table',
-	perPage: 25,
-	layout: {},
-	fields: [
-		'check_name',
-		'description',
-		'scope_label',
-		'plugin_name',
-		'level',
-	],
-};
 
 export function App() {
 	const [ rows, setRows ] = useState( [] );
@@ -38,14 +28,18 @@ export function App() {
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ isDirty, setIsDirty ] = useState( false );
 	const [ notice, setNotice ] = useState( null );
-	const [ view, setView ] = useState( DEFAULT_VIEW );
+	const [ searchTerm, setSearchTerm ] = useState( '' );
+	const [ sortConfig, setSortConfig ] = useState( {
+		key: 'check_name',
+		direction: 'asc',
+	} );
 
 	useEffect( () => {
 		async function fetchData() {
 			try {
 				const [ checks, settings ] = await Promise.all( [
-					apiFetch( { path: '/validation-api/v1/checks' } ),
-					apiFetch( { path: '/validation-api/v1/settings' } ),
+					apiFetch( { path: '/wp/v2/validation-checks' } ),
+					apiFetch( { path: '/wp/v2/validation-settings' } ),
 				] );
 
 				setRows( transformChecksToRows( checks, settings ) );
@@ -91,7 +85,7 @@ export function App() {
 			const settings = rowsToSettings( rows );
 
 			await apiFetch( {
-				path: '/validation-api/v1/settings',
+				path: '/wp/v2/validation-settings',
 				method: 'POST',
 				data: settings,
 			} );
@@ -119,51 +113,41 @@ export function App() {
 		}
 	}, [ rows ] );
 
-	const fields = useMemo(
-		() => [
-			{
-				id: 'check_name',
-				label: __( 'Check', 'validation-api-settings' ),
-				enableGlobalSearch: true,
-				enableSorting: true,
-			},
-			{
-				id: 'description',
-				label: __( 'Description', 'validation-api-settings' ),
-				enableGlobalSearch: true,
-			},
-			{
-				id: 'scope_label',
-				label: __( 'Scope', 'validation-api-settings' ),
-				enableSorting: true,
-			},
-			{
-				id: 'plugin_name',
-				label: __( 'Plugin', 'validation-api-settings' ),
-				enableSorting: true,
-			},
-			{
-				id: 'level',
-				label: __( 'Level', 'validation-api-settings' ),
-				render: ( { item } ) => (
-					<SelectControl
-						__nextHasNoMarginBottom
-						value={ item.level }
-						options={ LEVEL_OPTIONS }
-						onChange={ ( value ) =>
-							handleLevelChange( item.id, value )
-						}
-					/>
-				),
-				elements: LEVEL_OPTIONS,
-			},
-		],
-		[ handleLevelChange ]
-	);
+	const handleSort = useCallback( ( key ) => {
+		if ( ! SORTABLE_COLUMNS.includes( key ) ) {
+			return;
+		}
 
-	const { data: visibleData, paginationInfo } = useMemo( () => {
-		return filterSortAndPaginate( rows, view, fields );
-	}, [ rows, view, fields ] );
+		setSortConfig( ( prev ) => ( {
+			key,
+			direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+		} ) );
+	}, [] );
+
+	const visibleRows = useMemo( () => {
+		let filtered = rows;
+
+		if ( searchTerm ) {
+			const term = searchTerm.toLowerCase();
+			filtered = rows.filter(
+				( row ) =>
+					row.description.toLowerCase().includes( term ) ||
+					row.target.toLowerCase().includes( term )
+			);
+		}
+
+		const { key, direction } = sortConfig;
+		filtered.sort( ( a, b ) => {
+			const aVal = ( a[ key ] || '' ).toLowerCase();
+			const bVal = ( b[ key ] || '' ).toLowerCase();
+
+			if ( aVal < bVal ) return direction === 'asc' ? -1 : 1;
+			if ( aVal > bVal ) return direction === 'asc' ? 1 : -1;
+			return 0;
+		} );
+
+		return filtered;
+	}, [ rows, searchTerm, sortConfig ] );
 
 	if ( isLoading ) {
 		return (
@@ -203,15 +187,6 @@ export function App() {
 			) }
 
 			<Card>
-				{/* <CardHeader>
-					<h2>
-						{ __(
-							'Registered Checks',
-							'validation-api-settings'
-						) }
-					</h2>
-                    <p>{ __( 'Manage the validation settings for your site.', 'validation-api-settings' ) }</p>
-				</CardHeader> */}
 				<CardBody>
 					{ rows.length === 0 ? (
 						<Notice status="warning" isDismissible={ false }>
@@ -221,14 +196,80 @@ export function App() {
 							) }
 						</Notice>
 					) : (
-						<DataViews
-							data={ visibleData }
-							fields={ fields }
-							view={ view }
-							onChangeView={ setView }
-							paginationInfo={ paginationInfo }
-							getItemId={ ( item ) => item.id }
-						/>
+						<>
+							<SearchControl
+								__nextHasNoMarginBottom
+								value={ searchTerm }
+								onChange={ setSearchTerm }
+								placeholder={ __(
+									'Search checks\u2026',
+									'validation-api-settings'
+								) }
+							/>
+
+							<div className="validation-api-settings__table-wrap">
+								<table className="validation-api-settings__table">
+									<thead>
+										<tr>
+											{ COLUMNS.map( ( col ) => {
+												const isSortable = SORTABLE_COLUMNS.includes( col.key );
+												const isSorted = sortConfig.key === col.key;
+
+												return (
+													<th
+														key={ col.key }
+														className={ isSortable ? 'is-sortable' : undefined }
+														onClick={ isSortable ? () => handleSort( col.key ) : undefined }
+														aria-sort={
+															isSorted
+																? sortConfig.direction === 'asc'
+																	? 'ascending'
+																	: 'descending'
+																: undefined
+														}
+													>
+														{ col.label }
+														{ isSorted && (
+															<span className="sort-indicator">
+																{ sortConfig.direction === 'asc' ? ' \u25B2' : ' \u25BC' }
+															</span>
+														) }
+													</th>
+												);
+											} ) }
+										</tr>
+									</thead>
+									<tbody>
+										{ visibleRows.map( ( row ) => (
+											<tr key={ row.id }>
+												<td>{ row.description }</td>
+												<td>{ row.target }</td>
+												<td>{ row.check_type }</td>
+												<td>{ row.plugin_name }</td>
+												<td>
+													<SeveritySelect
+														value={ row.level }
+														onChange={ ( value ) =>
+															handleLevelChange( row.id, value )
+														}
+													/>
+												</td>
+											</tr>
+										) ) }
+										{ visibleRows.length === 0 && (
+											<tr>
+												<td colSpan={ COLUMNS.length }>
+													{ __(
+														'No checks match your search.',
+														'validation-api-settings'
+													) }
+												</td>
+											</tr>
+										) }
+									</tbody>
+								</table>
+							</div>
+						</>
 					) }
 				</CardBody>
 			</Card>

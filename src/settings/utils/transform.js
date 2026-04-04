@@ -1,8 +1,11 @@
+const { blockTitles = {}, postTypeLabels = {} } =
+	window.validationApiSettings || {};
+
 /**
- * Flatten the nested checks REST response into a row-per-check array for DataForm.
+ * Flatten the nested checks REST response into a row-per-check array.
  *
- * @param {Object} checks  The response from GET /validation-api/v1/checks.
- * @param {Object} settings The response from GET /validation-api/v1/settings.
+ * @param {Object} checks  The response from GET /wp/v2/checks.
+ * @param {Object} settings The response from GET /wp/v2/settings.
  * @return {Array} Flat array of row objects.
  */
 export function transformChecksToRows( checks, settings ) {
@@ -28,9 +31,9 @@ export function transformChecksToRows( checks, settings ) {
 					check_name: checkName,
 					description: check.description || '',
 					scope: 'block',
-					scope_label: `Block: ${ blockType }`,
-					scope_identifier: blockType,
-					plugin_name: check._plugin?.name || '\u2014',
+					check_type: 'Block',
+					target: blockTitles[ blockType ] || blockType,
+					plugin_name: check._namespace || '\u2014',
 					level: override || check.level,
 					default_level: check.level,
 					has_override: override !== null,
@@ -62,9 +65,9 @@ export function transformChecksToRows( checks, settings ) {
 						check_name: checkName,
 						description: check.description || '',
 						scope: 'meta',
-						scope_label: `Meta: ${ postType } / ${ metaKey }`,
-						scope_identifier: `${ postType }/${ metaKey }`,
-						plugin_name: check._plugin?.name || '\u2014',
+						check_type: 'Meta',
+						target: `${ metaKey } (${ postTypeLabels[ postType ] || postType })`,
+						plugin_name: check._namespace || '\u2014',
 						level: override || check.level,
 						default_level: check.level,
 						has_override: override !== null,
@@ -94,9 +97,9 @@ export function transformChecksToRows( checks, settings ) {
 					check_name: checkName,
 					description: check.description || '',
 					scope: 'editor',
-					scope_label: `Editor: ${ postType }`,
-					scope_identifier: postType,
-					plugin_name: check._plugin?.name || '\u2014',
+					check_type: 'Editor',
+					target: postTypeLabels[ postType ] || postType,
+					plugin_name: check._namespace || '\u2014',
 					level: override || check.level,
 					default_level: check.level,
 					has_override: override !== null,
@@ -113,7 +116,7 @@ export function transformChecksToRows( checks, settings ) {
  * Only includes rows that have been overridden.
  *
  * @param {Array} rows The flat array of row objects.
- * @return {Object} Nested settings object for POST /validation-api/v1/settings.
+ * @return {Object} Nested settings object for POST /wp/v2/settings.
  */
 export function rowsToSettings( rows ) {
 	const settings = {};

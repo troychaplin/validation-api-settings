@@ -1,22 +1,13 @@
 {
-    "name": "validation-api/settings",
-    "description": "Admin settings page for the Validation API plugin",
-    "type": "library",
-    "license": "GPL-2.0-or-later",
-    "autoload": {
-        "classmap": [
-            "includes/"
-        ],
-        "files": [
-            "bootstrap.php"
-        ]
-    },
-    "require": {
-        "php": ">=7.0"
-    },
-    "config": {
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
-    }
+	"name": "validation-api/settings",
+	"description": "Admin settings page for the Validation API plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=7.4"
+	},
+	"autoload": {
+		"classmap": [
+			"includes/"
+		]
+	}
 }

@@ -57,12 +57,45 @@ class Plugin {
 	}
 
 	/**
+	 * Get a map of block type slug to human-readable title.
+	 *
+	 * @return array<string, string>
+	 */
+	private function get_block_titles() {
+		$titles = array();
+
+		foreach ( \WP_Block_Type_Registry::get_instance()->get_all_registered() as $block_type ) {
+			if ( ! empty( $block_type->title ) ) {
+				$titles[ $block_type->name ] = $block_type->title;
+			}
+		}
+
+		return $titles;
+	}
+
+	/**
+	 * Get a map of post type slug to singular label.
+	 *
+	 * @return array<string, string>
+	 */
+	private function get_post_type_labels() {
+		$labels     = array();
+		$post_types = get_post_types( array(), 'objects' );
+
+		foreach ( $post_types as $post_type ) {
+			$labels[ $post_type->name ] = $post_type->labels->singular_name;
+		}
+
+		return $labels;
+	}
+
+	/**
 	 * Get the URL to the package directory.
 	 *
 	 * @return string
 	 */
 	private function get_package_url() {
-		return plugins_url( '', VALIDATION_API_SETTINGS_DIR . 'bootstrap.php' ) . '/';
+		return plugin_dir_url( VALIDATION_API_SETTINGS_FILE );
 	}
 
 	/**
@@ -93,16 +126,9 @@ class Plugin {
 		);
 
 		wp_enqueue_style(
-			'validation-api-settings-dataviews',
-			$package_url . 'build/dataviews.css',
-			array( 'wp-components' ),
-			$asset['version']
-		);
-
-		wp_enqueue_style(
 			'validation-api-settings',
 			$package_url . 'build/validation-api-settings.css',
-			array( 'wp-components', 'validation-api-settings-dataviews' ),
+			array( 'wp-components' ),
 			$asset['version']
 		);
 
@@ -110,8 +136,10 @@ class Plugin {
 			'validation-api-settings',
 			'validationApiSettings',
 			array(
-				'restUrl' => rest_url( 'validation-api/v1' ),
-				'nonce'   => wp_create_nonce( 'wp_rest' ),
+				'restUrl'        => rest_url( 'wp/v2' ),
+				'nonce'          => wp_create_nonce( 'wp_rest' ),
+				'blockTitles'    => $this->get_block_titles(),
+				'postTypeLabels' => $this->get_post_type_labels(),
 			)
 		);
 	}

@@ -7,13 +7,13 @@ const LEVEL_OPTIONS = [
 	{ value: 'none', label: __( 'Disabled', 'validation-api-settings' ) },
 ];
 
-export function SeveritySelect( { data, field, onChange } ) {
+export function SeveritySelect( { value, onChange } ) {
 	return (
 		<SelectControl
 			__nextHasNoMarginBottom
-			value={ data[ field.id ] }
+			value={ value }
 			options={ LEVEL_OPTIONS }
-			onChange={ ( value ) => onChange( { [ field.id ]: value } ) }
+			onChange={ onChange }
 		/>
 	);
 }

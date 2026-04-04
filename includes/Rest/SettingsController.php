@@ -15,14 +15,14 @@ class SettingsController extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'validation-api/v1';
+	protected $namespace = 'wp/v2';
 
 	/**
 	 * The REST base.
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'settings';
+	protected $rest_base = 'validation-settings';
 
 	/**
 	 * The option key for storing settings.

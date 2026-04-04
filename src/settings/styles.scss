@@ -20,54 +20,87 @@
 		margin: 0 0 16px;
 	}
 
-	// Prevent table from overflowing the page.
-	.dataviews-wrapper {
+	.components-search-control {
+		margin-bottom: 16px;
+	}
+
+	&__table-wrap {
 		overflow-x: auto;
 	}
 
-    .dataviews__view-actions {
-        padding-left: 0;
-        padding-right: 0;
-    }
+	&__table {
+		width: 100%;
+		border-collapse: collapse;
+		border-spacing: 0;
 
-	// Level select dropdown — ensure labels are fully visible.
-	.dataviews-view-table .components-select-control {
-		min-width: 140px;
-
-		select {
-			min-width: 140px;
-		}
-	}
-
-	// Column widths — keep the table from being too wide.
-	.dataviews-view-table th,
-	.dataviews-view-table td {
-        white-space: wrap;
-        
-		&:nth-child(1) { // Check
-			width: 180px;
-			min-width: 150px;
-            padding-left: 0;
+		th,
+		td {
+			padding: 8px 12px;
+			text-align: left;
+			vertical-align: middle;
+			border-bottom: 1px solid #ddd;
 		}
 
-		&:nth-child(2) { // Description
+		th {
+			font-weight: 600;
+			white-space: nowrap;
+
+			&.is-sortable {
+				cursor: pointer;
+				user-select: none;
+
+				&:hover {
+					color: #2271b1;
+				}
+			}
+
+			.sort-indicator {
+				font-size: 10px;
+				margin-left: 2px;
+			}
+		}
+
+		tbody tr:hover {
+			background-color: #f6f7f7;
+		}
+
+		// Column widths: Description | Target | Check Type | Plugin | Level
+		th:nth-child(1),
+		td:nth-child(1) {
 			width: auto;
-			max-width: 400px;
 		}
 
-		&:nth-child(3) { // Scope
+		th:nth-child(2),
+		td:nth-child(2) {
 			width: 200px;
 			min-width: 160px;
 		}
 
-		&:nth-child(4) { // Plugin
+		th:nth-child(3),
+		td:nth-child(3) {
+			width: 140px;
+			min-width: 100px;
+		}
+
+		th:nth-child(4),
+		td:nth-child(4) {
 			width: 200px;
 			min-width: 160px;
 		}
 
-		&:nth-child(5) { // Level
+		th:nth-child(5),
+		td:nth-child(5) {
 			width: 160px;
 			min-width: 140px;
+		}
+
+		// Level select dropdown.
+		.components-select-control {
+			min-width: 140px;
+
+			select {
+				min-width: 140px;
+			}
 		}
 	}
 }
