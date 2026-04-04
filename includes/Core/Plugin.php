@@ -57,6 +57,48 @@ class Plugin {
 	}
 
 	/**
+	 * Get a map of block type slug to human-readable title.
+	 *
+	 * @return array<string, string>
+	 */
+	private function get_block_titles() {
+		$titles = array();
+
+		foreach ( \WP_Block_Type_Registry::get_instance()->get_all_registered() as $block_type ) {
+			if ( ! empty( $block_type->title ) ) {
+				$titles[ $block_type->name ] = $block_type->title;
+			}
+		}
+
+		return $titles;
+	}
+
+	/**
+	 * Get a map of post type slug to singular label.
+	 *
+	 * @return array<string, string>
+	 */
+	private function get_post_type_labels() {
+		$labels     = array();
+		$post_types = get_post_types( array(), 'objects' );
+
+		foreach ( $post_types as $post_type ) {
+			$labels[ $post_type->name ] = $post_type->labels->singular_name;
+		}
+
+		return $labels;
+	}
+
+	/**
+	 * Get the URL to the package directory.
+	 *
+	 * @return string
+	 */
+	private function get_package_url() {
+		return plugin_dir_url( VALIDATION_API_SETTINGS_FILE );
+	}
+
+	/**
 	 * Enqueue admin scripts and styles on the settings page only.
 	 *
 	 * @param string $hook_suffix The current admin page hook suffix.
@@ -72,11 +114,12 @@ class Plugin {
 			return;
 		}
 
-		$asset = require $asset_file;
+		$asset       = require $asset_file;
+		$package_url = $this->get_package_url();
 
 		wp_enqueue_script(
 			'validation-api-settings',
-			VALIDATION_API_SETTINGS_URL . 'build/validation-api-settings.js',
+			$package_url . 'build/validation-api-settings.js',
 			$asset['dependencies'],
 			$asset['version'],
 			true
@@ -84,7 +127,7 @@ class Plugin {
 
 		wp_enqueue_style(
 			'validation-api-settings',
-			VALIDATION_API_SETTINGS_URL . 'build/validation-api-settings.css',
+			$package_url . 'build/validation-api-settings.css',
 			array( 'wp-components' ),
 			$asset['version']
 		);
@@ -93,8 +136,10 @@ class Plugin {
 			'validation-api-settings',
 			'validationApiSettings',
 			array(
-				'restUrl' => rest_url( 'validation-api/v1' ),
-				'nonce'   => wp_create_nonce( 'wp_rest' ),
+				'restUrl'        => rest_url( 'wp/v2' ),
+				'nonce'          => wp_create_nonce( 'wp_rest' ),
+				'blockTitles'    => $this->get_block_titles(),
+				'postTypeLabels' => $this->get_post_type_labels(),
 			)
 		);
 	}

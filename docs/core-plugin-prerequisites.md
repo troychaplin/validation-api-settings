@@ -16,6 +16,13 @@ These changes must be made to the `validation-api` plugin before building the co
 - [ ] Update `Meta\Registry::register_meta_check()` to read and store `_plugin` from active context
 - [ ] Update `Editor\Registry::register_editor_check()` to read and store `_plugin` from active context
 
+## Configurable Flag
+
+- [ ] Add `'configurable' => true` to default check args in `Block\Registry::register_check()`
+- [ ] Add `'configurable' => true` to default check args in `Meta\Registry::register_meta_check()`
+- [ ] Add `'configurable' => true` to default check args in `Editor\Registry::register_editor_check()`
+- [ ] Include `configurable` in `ChecksController::format_check()` REST response
+
 ## REST API
 
 - [ ] Create `includes/Rest/ChecksController.php` extending `WP_REST_Controller`

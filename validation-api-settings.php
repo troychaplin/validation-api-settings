@@ -1,15 +1,14 @@
 <?php
 /**
  * Plugin Name:       Validation API Settings
- * Description:       Admin settings page for the Validation API — override check severity levels globally.
- * Requires at least: 6.9
- * Requires PHP:      7.0
+ * Description:       Admin settings page for the Validation API plugin. Adds a top-level menu page where site administrators can configure the level (error, warning, or disabled) of each registered validation check.
  * Version:           1.0.0
- * Author:            Troy Chaplin
+ * Requires at least: 6.5
+ * Requires PHP:      7.4
+ * Requires Plugins:  validation-api
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       validation-api-settings
- * Requires Plugins:  validation-api
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,7 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'VALIDATION_API_SETTINGS_VERSION', '1.0.0' );
 define( 'VALIDATION_API_SETTINGS_FILE', __FILE__ );
 define( 'VALIDATION_API_SETTINGS_DIR', plugin_dir_path( __FILE__ ) );
-define( 'VALIDATION_API_SETTINGS_URL', plugin_dir_url( __FILE__ ) );
 
 require_once VALIDATION_API_SETTINGS_DIR . 'vendor/autoload.php';
 
