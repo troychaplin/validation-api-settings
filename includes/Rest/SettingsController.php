@@ -15,7 +15,7 @@ class SettingsController extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wp/v2';
+	protected $namespace = 'validation-api-settings/v1';
 
 	/**
 	 * The REST base.
@@ -127,7 +127,7 @@ class SettingsController extends WP_REST_Controller {
 
 		$sanitized = $this->sanitize_settings( $settings );
 
-		update_option( self::OPTION_KEY, $sanitized );
+		update_option( self::OPTION_KEY, $sanitized, true );
 
 		return new WP_REST_Response( $sanitized, 200 );
 	}

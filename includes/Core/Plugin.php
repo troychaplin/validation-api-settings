@@ -53,7 +53,7 @@ class Plugin {
 	 * Render the settings page root element.
 	 */
 	public function render_settings_page() {
-		echo '<div id="validation-api-settings-root"></div>';
+		echo '<div id="validation-api-settings-root"><h1 class="screen-reader-text">' . esc_html__( 'Validation API Settings', 'validation-api-settings' ) . '</h1></div>';
 	}
 
 	/**
@@ -132,15 +132,13 @@ class Plugin {
 			$asset['version']
 		);
 
-		wp_localize_script(
+		wp_add_inline_script(
 			'validation-api-settings',
-			'validationApiSettings',
-			array(
-				'restUrl'        => rest_url( 'wp/v2' ),
-				'nonce'          => wp_create_nonce( 'wp_rest' ),
+			'window.validationApiSettings = ' . wp_json_encode( array(
 				'blockTitles'    => $this->get_block_titles(),
 				'postTypeLabels' => $this->get_post_type_labels(),
-			)
+			) ) . ';',
+			'before'
 		);
 	}
 }

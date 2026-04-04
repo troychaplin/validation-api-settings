@@ -5,6 +5,13 @@ namespace ValidationAPISettings\Filter;
 class LevelOverride {
 
 	/**
+	 * Cached settings from wp_options, loaded lazily.
+	 *
+	 * @var array|null
+	 */
+	private $options;
+
+	/**
 	 * Register the filter hook.
 	 */
 	public function register() {
@@ -19,7 +26,11 @@ class LevelOverride {
 	 * @return string The overridden level, or the original if no override exists.
 	 */
 	public function apply_override( $level, $context ) {
-		$options  = get_option( 'validation_api_settings', array() );
+		if ( $this->options === null ) {
+			$this->options = get_option( 'validation_api_settings', array() );
+		}
+
+		$options  = $this->options;
 		$scope    = $context['scope'] ?? '';
 		$override = null;
 

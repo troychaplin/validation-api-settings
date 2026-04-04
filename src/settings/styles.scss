@@ -20,10 +20,6 @@
 		margin: 0 0 16px;
 	}
 
-	.components-search-control {
-		margin-bottom: 16px;
-	}
-
 	&__table-wrap {
 		overflow-x: auto;
 	}
@@ -44,20 +40,6 @@
 		th {
 			font-weight: 600;
 			white-space: nowrap;
-
-			&.is-sortable {
-				cursor: pointer;
-				user-select: none;
-
-				&:hover {
-					color: #2271b1;
-				}
-			}
-
-			.sort-indicator {
-				font-size: 10px;
-				margin-left: 2px;
-			}
 		}
 
 		tbody tr:hover {
@@ -101,6 +83,34 @@
 			select {
 				min-width: 140px;
 			}
+		}
+	}
+
+	&__sort-button {
+		display: inline-flex;
+		align-items: center;
+		padding: 0;
+		border: none;
+		background: none;
+		font: inherit;
+		font-weight: 600;
+		cursor: pointer;
+		user-select: none;
+		color: inherit;
+
+		&:hover,
+		&:focus {
+			color: #2271b1;
+		}
+
+		&:focus-visible {
+			outline: 2px solid #2271b1;
+			outline-offset: 2px;
+		}
+
+		.sort-indicator {
+			font-size: 10px;
+			margin-left: 2px;
 		}
 	}
 }

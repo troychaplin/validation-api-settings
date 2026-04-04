@@ -22,10 +22,6 @@ define( 'VALIDATION_API_SETTINGS_DIR', plugin_dir_path( __FILE__ ) );
 require_once VALIDATION_API_SETTINGS_DIR . 'vendor/autoload.php';
 
 add_action( 'plugins_loaded', function () {
-	if ( ! class_exists( 'ValidationAPI\\Core\\Plugin' ) ) {
-		return;
-	}
-
 	$plugin = new ValidationAPISettings\Core\Plugin();
 	$plugin->init();
 } );
