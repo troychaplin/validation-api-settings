@@ -4,7 +4,7 @@ const { blockTitles = {}, postTypeLabels = {} } =
 /**
  * Flatten the nested checks REST response into a row-per-check array.
  *
- * @param {Object} checks  The response from GET /wp/v2/validation-checks.
+ * @param {Object} checks  The response from GET /wp-validation/v1/checks.
  * @param {Object} settings The response from GET /validation-api-settings/v1/validation-settings.
  * @return {Array} Flat array of row objects.
  */
