@@ -2,6 +2,10 @@
 
 namespace ValidationAPISettings\Filter;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 class LevelOverride {
 
 	/**

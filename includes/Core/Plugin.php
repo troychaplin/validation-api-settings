@@ -2,6 +2,10 @@
 
 namespace ValidationAPISettings\Core;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use ValidationAPISettings\Filter\LevelOverride;
 use ValidationAPISettings\Rest\SettingsController;
 
