@@ -25,7 +25,7 @@ validation-api-settings.php          Plugin entry point
 includes/
   Core/Plugin.php                    Admin menu, REST routes, asset enqueue
   Rest/SettingsController.php        GET/POST at /validation-api-settings/v1/validation-settings
-  Filter/LevelOverride.php           Hooks wp_validation_check_level to apply overrides
+  Filter/LevelOverride.php           Hooks validation_api_check_level to apply overrides
 src/settings/
   index.js                           Entry point, renders App
   App.js                             Main React component (table, sorting, save)
