@@ -37,7 +37,7 @@ export function App() {
 		async function fetchData() {
 			try {
 				const [ checks, settings ] = await Promise.all( [
-					apiFetch( { path: '/wp/v2/validation-checks' } ),
+					apiFetch( { path: '/wp-validation/v1/checks' } ),
 					apiFetch( { path: '/validation-api-settings/v1/validation-settings' } ),
 				] );
 

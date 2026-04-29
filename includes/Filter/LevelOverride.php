@@ -15,7 +15,7 @@ class LevelOverride {
 	 * Register the filter hook.
 	 */
 	public function register() {
-		add_filter( 'wp_validation_check_level', array( $this, 'apply_override' ), 10, 2 );
+		add_filter( 'validation_api_check_level', array( $this, 'apply_override' ), 10, 2 );
 	}
 
 	/**
