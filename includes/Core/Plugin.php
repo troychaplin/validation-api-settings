@@ -1,4 +1,9 @@
 <?php
+/**
+ * Core plugin bootstrap.
+ *
+ * @package ValidationAPISettings
+ */
 
 namespace ValidationAPISettings\Core;
 
@@ -9,6 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 use ValidationAPISettings\Filter\LevelOverride;
 use ValidationAPISettings\Rest\SettingsController;
 
+/**
+ * Registers all hooks, REST routes, and admin assets for the plugin.
+ */
 class Plugin {
 
 	/**
@@ -138,10 +146,12 @@ class Plugin {
 
 		wp_add_inline_script(
 			'validation-api-settings',
-			'window.validationApiSettings = ' . wp_json_encode( array(
-				'blockTitles'    => $this->get_block_titles(),
-				'postTypeLabels' => $this->get_post_type_labels(),
-			) ) . ';',
+			'window.validationApiSettings = ' . wp_json_encode(
+				array(
+					'blockTitles'    => $this->get_block_titles(),
+					'postTypeLabels' => $this->get_post_type_labels(),
+				)
+			) . ';',
 			'before'
 		);
 	}

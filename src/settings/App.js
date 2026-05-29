@@ -38,8 +38,7 @@ export function App() {
 				setNotice( {
 					status: 'error',
 					message:
-						error.message ||
-						__( 'Failed to load checks.', 'validation-api-settings' ),
+						error.message || __( 'Failed to load checks.', 'validation-api-settings' ),
 				} );
 			} finally {
 				setIsLoading( false );
@@ -49,17 +48,21 @@ export function App() {
 	}, [] );
 
 	useEffect( () => {
-		const handler = ( e ) => {
-			if ( isDirty ) e.preventDefault();
+		const handler = e => {
+			if ( isDirty ) {
+				e.preventDefault();
+			}
 		};
 		window.addEventListener( 'beforeunload', handler );
 		return () => window.removeEventListener( 'beforeunload', handler );
 	}, [ isDirty ] );
 
 	const handleLevelChange = useCallback( ( rowId, newLevel ) => {
-		setRows( ( prevRows ) =>
-			prevRows.map( ( row ) => {
-				if ( row.id !== rowId ) return row;
+		setRows( prevRows =>
+			prevRows.map( row => {
+				if ( row.id !== rowId ) {
+					return row;
+				}
 				return {
 					...row,
 					level: newLevel,
@@ -70,10 +73,10 @@ export function App() {
 		setIsDirty( true );
 	}, [] );
 
-	const handleResetToDefault = useCallback( ( items ) => {
-		const itemIds = new Set( items.map( ( i ) => i.id ) );
-		setRows( ( prevRows ) =>
-			prevRows.map( ( row ) =>
+	const handleResetToDefault = useCallback( items => {
+		const itemIds = new Set( items.map( i => i.id ) );
+		setRows( prevRows =>
+			prevRows.map( row =>
 				itemIds.has( row.id )
 					? { ...row, level: row.default_level, has_override: false }
 					: row
@@ -101,8 +104,7 @@ export function App() {
 			setNotice( {
 				status: 'error',
 				message:
-					error.message ||
-					__( 'Failed to save settings.', 'validation-api-settings' ),
+					error.message || __( 'Failed to save settings.', 'validation-api-settings' ),
 			} );
 		} finally {
 			setIsSaving( false );
@@ -110,8 +112,8 @@ export function App() {
 	}, [ rows ] );
 
 	const pluginElements = useMemo( () => {
-		const plugins = [ ...new Set( rows.map( ( r ) => r.plugin_name ) ) ].sort();
-		return plugins.map( ( name ) => ( { value: name, label: name } ) );
+		const plugins = [ ...new Set( rows.map( r => r.plugin_name ) ) ].sort();
+		return plugins.map( name => ( { value: name, label: name } ) );
 	}, [ rows ] );
 
 	const fields = useMemo(
@@ -160,7 +162,7 @@ export function App() {
 				render: ( { item } ) => (
 					<SeveritySelect
 						value={ item.level }
-						onChange={ ( value ) => handleLevelChange( item.id, value ) }
+						onChange={ value => handleLevelChange( item.id, value ) }
 					/>
 				),
 			},
@@ -173,8 +175,8 @@ export function App() {
 			{
 				id: 'reset-to-default',
 				label: __( 'Reset to default', 'validation-api-settings' ),
-				isEligible: ( item ) => item.has_override,
-				callback: ( items ) => handleResetToDefault( items ),
+				isEligible: item => item.has_override,
+				callback: items => handleResetToDefault( items ),
 			},
 		],
 		[ handleResetToDefault ]
@@ -199,9 +201,7 @@ export function App() {
 	return (
 		<div className="validation-api-settings">
 			<div className="validation-api-settings__header">
-				<h1>
-					{ __( 'Validation API Settings', 'validation-api-settings' ) }
-				</h1>
+				<h1>{ __( 'Validation API Settings', 'validation-api-settings' ) }</h1>
 				<Button
 					variant="primary"
 					onClick={ handleSave }

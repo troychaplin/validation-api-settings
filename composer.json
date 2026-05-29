@@ -9,5 +9,24 @@
 		"classmap": [
 			"includes/"
 		]
+	},
+	"require-dev": {
+		"wp-coding-standards/wpcs": "3.3.0"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"scripts": {
+		"format": "phpcbf",
+		"lint": "phpcs",
+		"post-install-cmd": [
+			"@fix-vendor-test-files"
+		],
+		"post-update-cmd": [
+			"@fix-vendor-test-files"
+		],
+		"fix-vendor-test-files": "find vendor/squizlabs/php_codesniffer/tests -name '*.php' -exec sed -i '' 's/namespace \\([^.]*\\)\\\\.\\([^;]*\\);/namespace \\1.\\2;/g' {} \\;"
 	}
 }

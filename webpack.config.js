@@ -4,9 +4,6 @@ const path = require( 'path' );
 module.exports = {
 	...defaultConfig,
 	entry: {
-		'validation-api-settings': path.resolve(
-			__dirname,
-			'src/settings/index.js'
-		),
+		'validation-api-settings': path.resolve( __dirname, 'src/settings/index.js' ),
 	},
 };
