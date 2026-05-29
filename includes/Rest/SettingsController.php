@@ -1,4 +1,9 @@
 <?php
+/**
+ * REST API controller for validation settings.
+ *
+ * @package ValidationAPISettings
+ */
 
 namespace ValidationAPISettings\Rest;
 
@@ -8,6 +13,9 @@ use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
 
+/**
+ * Handles reading and updating per-check severity-level settings via the REST API.
+ */
 class SettingsController extends WP_REST_Controller {
 
 	/**

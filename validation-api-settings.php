@@ -9,6 +9,8 @@
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       validation-api-settings
+ *
+ * @package ValidationAPISettings
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,7 +23,10 @@ define( 'VALIDATION_API_SETTINGS_DIR', plugin_dir_path( __FILE__ ) );
 
 require_once VALIDATION_API_SETTINGS_DIR . 'vendor/autoload.php';
 
-add_action( 'plugins_loaded', function () {
-	$plugin = new ValidationAPISettings\Core\Plugin();
-	$plugin->init();
-} );
+add_action(
+	'plugins_loaded',
+	function () {
+		$plugin = new ValidationAPISettings\Core\Plugin();
+		$plugin->init();
+	}
+);

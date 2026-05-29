@@ -1,4 +1,9 @@
 <?php
+/**
+ * Level override filter.
+ *
+ * @package ValidationAPISettings
+ */
 
 namespace ValidationAPISettings\Filter;
 
@@ -6,6 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Applies saved severity-level overrides to validation checks via a filter hook.
+ */
 class LevelOverride {
 
 	/**
@@ -30,7 +38,7 @@ class LevelOverride {
 	 * @return string The overridden level, or the original if no override exists.
 	 */
 	public function apply_override( $level, $context ) {
-		if ( $this->options === null ) {
+		if ( null === $this->options ) {
 			$this->options = get_option( 'validation_api_settings', array() );
 		}
 
