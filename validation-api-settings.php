@@ -3,7 +3,7 @@
  * Plugin Name:       Validation API Settings
  * Description:       Admin settings page for the Validation API plugin. Adds a top-level menu page where site administrators can configure the level (error, warning, or disabled) of each registered validation check.
  * Version:           1.0.0
- * Requires at least: 6.5
+ * Requires at least: 6.6
  * Requires PHP:      7.4
  * Requires Plugins:  validation-api
  * License:           GPL-2.0-or-later
