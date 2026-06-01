@@ -2,7 +2,7 @@
 
 This plugin consumes the [Validation API](https://github.com/troychaplin/validation-api) plugin's `validation_api_check_level` filter. The Validation API plugin uses `validation_api_*` names in its standalone form for WordPress.org plugin directory compliance, but renames everything back to `wp_*` if/when it merges into Gutenberg core.
 
-**When to use this doc:** the Validation API has merged into Gutenberg core (or the Gutenberg plugin) and is shipping under its core-style names. At that point, this companion plugin needs a one-line rename to keep working.
+**When to use this doc:** if the Validation API has merged into Gutenberg and is shipping under its core-style names. At that point, this companion plugin needs a one-line rename to keep working.
 
 ## What changes
 
